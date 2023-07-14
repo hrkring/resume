@@ -1,0 +1,109 @@
+---
+title: "Haniah Kring's Resume"
+author: Haniah Kring
+date: "`r Sys.Date()`"
+params:
+  pdf_mode:
+    value: true
+output:
+  pagedown::html_resume:
+    css: ['dd_cv.css', 'resume']
+    self_contained: true
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(
+  results='asis', 
+  echo = FALSE
+)
+
+source("cv_printing_functions.r")
+source("cv_network_function.r")
+
+# Read in all data and initialize a CV printer object
+CV <- create_CV_object(
+  data_location = "https://docs.google.com/spreadsheets/d/1VSavsF26GWTzpikTpqzwQk67JDSTYcDpZ_69DlyliMU/edit#gid=917338460",  
+  pdf_mode = params$pdf_mode
+)
+
+```
+
+```{r}
+# When in pdf export mode the little dots are unaligned, so fix that with some conditional CSS.
+if(params$pdf_mode) {
+    cat("
+<style>
+:root{
+  --decorator-outer-offset-left: -6.5px;
+}
+</style>")
+}
+```
+
+# Aside
+
+```{r}
+# Build interactive network of positions colored by section
+# and connected if they occurred in the same year
+build_network_logo(CV$entries_data)
+```
+
+```{r}
+if(params$pdf_mode){
+  cat("View resume online with links at hrkring.github.io/resume/kring-resume.html")
+} else {
+  cat("[<i class='fas fa-download'></i> Download the PDF version](https://github.com/hrkring/hrkring.github.io/raw/main/resume/kring-resume.pdf)")
+}
+```
+
+## Contact {#contact}
+
+```{r}
+CV |> print_contact_info()
+```
+
+## Languages {#skills}
+
+```{r}
+CV |> print_skill_bars("language")
+```
+
+## Technologies
+
+```{r}
+CV |> print_skill_bars("technology")
+```
+
+## Disclaimer {#disclaimer}
+
+Made with the R package [**pagedown**](https://github.com/rstudio/pagedown).
+
+Last updated on `r Sys.Date()`.
+
+# Main
+
+## Haniah Kring {#title}
+
+## Education {data-icon="graduation-cap"}
+
+```{r}
+CV <- CV |> print_section('education')
+```
+
+## Industry Experience {data-icon="suitcase"}
+
+```{r}
+CV <- CV |> print_section('industry_positions')
+```
+
+## Research Experience {data-icon="laptop"}
+
+```{r}
+CV <- CV |> print_section('research_positions')
+```
+
+## Teaching Experience {data-icon="chalkboard-teacher"}
+
+```{r}
+CV <- CV |> print_section('teaching_positions')
+```
