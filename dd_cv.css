@@ -39,6 +39,10 @@ sup {
   break-inside: avoid;
 }
 
+.main-block:not(.concise) .details div{
+  margin: 0 0 0 0;
+}
+
 * {
   /* Override default right margin for sidebar*/
   --pagedjs-margin-right: 0.2in;

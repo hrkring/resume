@@ -101,35 +101,6 @@ create_CV_object <-  function(data_location,
 }
 
 
-# Remove links from a text block and add to internal list
-sanitize_links <- function(cv, text){
-  if(cv$pdf_mode){
-    link_titles <- stringr::str_extract_all(text, '(?<=\\[).+?(?=\\])')[[1]]
-    link_destinations <- stringr::str_extract_all(text, '(?<=\\().+?(?=\\))')[[1]]
-
-    n_links <- length(cv$links)
-    n_new_links <- length(link_titles)
-
-    if(n_new_links > 0){
-      # add links to links array
-      cv$links <- c(cv$links, link_destinations)
-
-      # Build map of link destination to superscript
-      link_superscript_mappings <- purrr::set_names(
-        paste0("<sup>", (1:n_new_links) + n_links, "</sup>"),
-        paste0("(", link_destinations, ")")
-      )
-
-      # Replace the link destination and remove square brackets for title
-      text <- text |>
-        stringr::str_replace_all(stringr::fixed(link_superscript_mappings)) |>
-        stringr::str_replace_all('\\[(.+?)\\]', "\\1")
-    }
-  }
-
-  list(cv = cv, text = text)
-}
-
 
 #' @description Take a position data frame and the section id desired and prints the section to markdown.
 #' @param section_id ID of the entries section to be printed as encoded by the `section` column of the `entries` table
@@ -155,7 +126,7 @@ print_section <- function(cv, section_id, glue_template = "default"){
   # so links for the same position are right next to each other in number.
   for(i in 1:nrow(section_data)){
     for(col in c('title', 'description_bullets')){
-      strip_res <- sanitize_links(cv, section_data[i, col])
+      strip_res <- list(cv = cv, text = section_data[i, col])
       section_data[i, col] <- strip_res$text
       cv <- strip_res$cv
     }
@@ -165,22 +136,6 @@ print_section <- function(cv, section_id, glue_template = "default"){
 
   invisible(strip_res$cv)
 }
-
-
-
-#' @description Prints out text block identified by a given label.
-#' @param label ID of the text block to print as encoded in `label` column of `text_blocks` table.
-print_text_block <- function(cv, label){
-  text_block <- dplyr::filter(cv$text_blocks, loc == label) |>
-    dplyr::pull(text)
-
-  strip_res <- sanitize_links(cv, text_block)
-
-  cat(strip_res$text)
-
-  invisible(strip_res$cv)
-}
-
 
 
 
@@ -202,29 +157,6 @@ print_skill_bars <- function(cv, skill_type, out_of = 5, bar_color = "#969696", 
     dplyr::mutate(width_percent = round(100*as.numeric(level)/out_of)) |>
     glue::glue_data(glue_template) |>
     print()
-
-  invisible(cv)
-}
-
-
-
-#' @description List of all links in document labeled by their superscript integer.
-print_links <- function(cv) {
-  n_links <- length(cv$links)
-  if (n_links > 0) {
-    cat("
-Links {data-icon=link}
---------------------------------------------------------------------------------
-
-<br>
-
-
-")
-
-    purrr::walk2(cv$links, 1:n_links, function(link, index) {
-      print(glue::glue('{index}. {link}'))
-    })
-  }
 
   invisible(cv)
 }

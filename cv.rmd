@@ -50,7 +50,7 @@ build_network_logo(CV$entries_data)
 
 ```{r}
 if(params$pdf_mode){
-  cat("View resume online with links at hrkring.github.io/resume/kring-resume.html")
+  cat("")
 } else {
   cat("[<i class='fas fa-download'></i> Download the PDF version](https://github.com/hrkring/hrkring.github.io/raw/main/resume/kring-resume.pdf)")
 }
